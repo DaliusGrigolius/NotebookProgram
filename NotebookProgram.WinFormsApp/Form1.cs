@@ -1,4 +1,4 @@
-namespace NotebookWinFormsApp
+namespace NotebookProgram.WinFormsApp
 {
     public partial class Form1 : Form
     {
