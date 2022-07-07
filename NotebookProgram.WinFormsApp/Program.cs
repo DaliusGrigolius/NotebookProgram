@@ -1,6 +1,4 @@
-using NotebookProgram.Repository.Entities;
-
-namespace NotebookWinFormsApp
+namespace NotebookProgram.WinFormsApp
 {
     internal static class Program
     {
