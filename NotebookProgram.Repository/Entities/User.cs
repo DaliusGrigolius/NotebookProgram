@@ -11,22 +11,20 @@ namespace NotebookProgram.Repository.Entities
     {
         public Guid Id { get; set; }
         [Required]
-        public string Email { get; set; }
+        public string Username { get; set; }
         [Required]
-        public string Password { get; set; }
+        public byte[] PasswordHash { get; set; }
         [Required]
-        public UserDetails UserDetails { get; set; }
+        public byte[] PasswordSalt { get; set; }
         public List<Note> Notes { get; set; }
-        public List<Category> Categories { get; set; }
 
-        public User(string email, string password, UserDetails userDetails)
+        public User(string username, byte[] passwordHash, byte[] passwordSalt)
         {
             Id = Guid.NewGuid();
-            Email = email;
-            Password = password;
-            UserDetails = userDetails;
+            Username = username;
+            PasswordHash = passwordHash;
+            PasswordSalt = passwordSalt;
             Notes = new List<Note>();
-            Categories = new List<Category>();
         }
     }
 }

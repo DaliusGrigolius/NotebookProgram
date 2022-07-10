@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,15 +12,15 @@ namespace NotebookProgram.Repository.Entities
     {
         public Guid Id { get; set; }
         [Required]
-        public string Url { get; set; }
-        [Required]
-        public string Alt { get; set; }
+        public byte[] Byte { get; set; }
+        [ForeignKey("Note")]
+        public Guid NoteId { get; set; }
+        public virtual Note Note { get; set; }
 
-        public Image(string url, string alt)
+        public Image(byte[] @byte)
         {
             Id = Guid.NewGuid();
-            Url = url;
-            Alt = alt;
+            Byte = @byte;
         }
     }
 }

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using NotebookProgram.Repository.DbContexts;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace NotebookProgram.Repository.Entities
@@ -13,15 +15,41 @@ namespace NotebookProgram.Repository.Entities
         [Required]
         public string Name { get; set; }
         [Required]
-        public bool IsVisible { get; set; }
+        public bool IsPublic { get; set; }
         public List<Note> Notes { get; set; }
 
-        public Category(string name, bool isVisible = false)
+        public Category(string name, bool isPublic = false)
         {
             Id = Guid.NewGuid();
             Name = name;
-            IsVisible = isVisible;
+            IsPublic = isPublic;
             Notes = new List<Note>();
+        }
+
+        public string AddCategory(NotebookDbContext context, string categoryName, bool isPublic = false)
+        {
+            context.Categories.Add(new Category(categoryName, isPublic));
+            context.SaveChanges();
+            return "Success: new category added.";
+        }
+
+        public string EditCategory(NotebookDbContext context, Guid categoryId, string newCategoryName)
+        {
+            var category = context.Categories.Find(categoryId);
+            category.Name = newCategoryName;
+            context.Update(category);
+            context.SaveChanges();
+
+            return "Success: category updated.";
+        }
+
+        public string RemoveCategory(NotebookDbContext context, Guid categoryId)
+        {
+            var category = context.Categories.Find(categoryId);
+            context.Categories.Remove(category);
+            context.SaveChanges();
+
+            return "Success: category removed.";
         }
     }
 }
