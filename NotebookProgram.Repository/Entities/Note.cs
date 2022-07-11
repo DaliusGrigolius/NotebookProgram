@@ -31,6 +31,7 @@ namespace NotebookProgram.Repository.Entities
             Content = content;
             IsPublic = isPublic;
             Categories = new List<Category>();
+            Images = new List<Image>();
         }
 
         public string CreateANote(NotebookDbContext context, string caption, string content, bool isPublic = false)

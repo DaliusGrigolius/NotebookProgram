@@ -10,14 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-
 //builder.Services.AddSingleton<IConfiguration>(configuration);
 //builder.Services.AddScoped<IDbConfigurations, DbConfigurations>();
-builder.Services.AddDbContext<NotebookDbContext>();
-//options =>
-//{
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("myDb1"));
-//}
+builder.Services.AddDbContext<NotebookDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("myDb1")));
 builder.Services.AddAuthentication(opt =>
 {
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -25,6 +20,7 @@ builder.Services.AddAuthentication(opt =>
 })
     .AddJwtBearer(options =>
     {
+        options.SaveToken = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -32,9 +28,9 @@ builder.Services.AddAuthentication(opt =>
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
 
-            ValidIssuer = "guest",
-            ValidAudience = "https://localhost:5090",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@2410"))
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

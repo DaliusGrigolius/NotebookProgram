@@ -17,6 +17,7 @@ namespace NotebookProgram.Repository.Entities
         [Required]
         public byte[] PasswordSalt { get; set; }
         public List<Note> Notes { get; set; }
+        public List<RefreshToken> RefreshTokens { get; set; }
 
         public User(string username, byte[] passwordHash, byte[] passwordSalt)
         {
