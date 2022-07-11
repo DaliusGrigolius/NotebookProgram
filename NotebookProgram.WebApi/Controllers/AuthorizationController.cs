@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NotebookProgram.Repository.DbContexts;
 using NotebookProgram.Repository.Entities;
@@ -15,9 +16,11 @@ namespace NotebookProgram.WebApi.Controllers
     public class AuthorizationController : Controller
     {
         private readonly NotebookDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AuthorizationController(NotebookDbContext context)
+        public AuthorizationController(IConfiguration configuration, NotebookDbContext context)
         {
+            _configuration = configuration;
             _context = context;
         }
 
@@ -45,7 +48,9 @@ namespace NotebookProgram.WebApi.Controllers
                 return BadRequest("Wrong username or/and password");
             }
 
-            var user = _context.Users.Where(u => u.Username == request.Username).FirstOrDefault();
+            var user = _context.Users
+                .Include(i => i.RefreshTokens)
+                .FirstOrDefault(u => u.Username == request.Username);
 
             if (!PasswordHashIsVerified(request.Password, user.PasswordHash, user.PasswordSalt))
             {
@@ -54,31 +59,36 @@ namespace NotebookProgram.WebApi.Controllers
 
             string token = CreateToken(user);
 
+            var refreshToken = GenerateRefreshToken();
+            SetRefreshToken(refreshToken, user);
+
             return Ok(new { Token = token });
-            //------------------------------------------------------
-            //if (model == null)
-            //{
-            //    return BadRequest("Invalid client request");
-            //}
-            //if (model.Username == "string" && model.Password == "string")
-            //{
-            //var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@2410"));
-            //var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-            //var tokenOptions = new JwtSecurityToken(
-            //    issuer: "guest",
-            //    audience: "https://localhost:5090",
-            //    claims: new List<Claim>(),
-            //    expires: DateTime.Now.AddMinutes(5),
-            //    signingCredentials: signinCredentials
-            //);
-            //var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-            //return Ok(new { Token = tokenString });
-            //}
-            //else
-            //{
-            //    return Unauthorized();
-            //}
-            //------------------------------------------------------
+        }
+
+        private RefreshToken GenerateRefreshToken()
+        {
+            var refreshToken = new RefreshToken
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                Created = DateTime.Now,
+                Expires = DateTime.Now.AddMinutes(15),
+            };
+
+            return refreshToken;
+        }
+
+        private void SetRefreshToken(RefreshToken newRefreshToken, User user)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = newRefreshToken.Expires
+            };
+            Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
+
+            user.RefreshTokens.Add(newRefreshToken);
+            _context.RefreshTokens.Add(newRefreshToken);
+            _context.SaveChanges();
         }
 
         private bool NameIsTaken(string username)
@@ -106,8 +116,23 @@ namespace NotebookProgram.WebApi.Controllers
 
         private string CreateToken(User user)
         {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+            };
 
-            return "";
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+            var tokenOptions = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(15),
+                signingCredentials: signinCredentials
+            );
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+
+            return tokenString;
         }
     }
 }
