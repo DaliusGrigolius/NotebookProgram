@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NotebookProgram.Repository.Entities
+namespace NotebookProgram.Dto
 {
     public class UserDto
     {

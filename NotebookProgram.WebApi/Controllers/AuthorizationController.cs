@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NotebookProgram.Dto;
 using NotebookProgram.Repository.DbContexts;
 using NotebookProgram.Repository.Entities;
 using System.IdentityModel.Tokens.Jwt;
@@ -90,8 +91,8 @@ namespace NotebookProgram.WebApi.Controllers
             var refreshToken = new RefreshToken
             {
                 Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-                Created = DateTime.Now,
-                Expires = DateTime.Now.AddMinutes(15),
+                Created = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddDays(7),
             };
 
             return refreshToken;
@@ -139,6 +140,7 @@ namespace NotebookProgram.WebApi.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -147,7 +149,7 @@ namespace NotebookProgram.WebApi.Controllers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(5),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: signinCredentials
             );
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
