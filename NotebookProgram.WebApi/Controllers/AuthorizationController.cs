@@ -17,11 +17,13 @@ namespace NotebookProgram.WebApi.Controllers
     {
         private readonly NotebookDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContext;
 
-        public AuthorizationController(IConfiguration configuration, NotebookDbContext context)
+        public AuthorizationController(IConfiguration configuration, NotebookDbContext context, IHttpContextAccessor httpContext)
         {
             _configuration = configuration;
             _context = context;
+            _httpContext = httpContext;
         }
 
         [HttpPost("register")]
@@ -63,6 +65,24 @@ namespace NotebookProgram.WebApi.Controllers
             SetRefreshToken(refreshToken, user);
 
             return Ok(new { Token = token });
+        }
+
+        public Guid GetCurrentUserId()
+        {
+            string userId = _httpContext.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (userId == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            if (Guid.TryParse(userId, out Guid userIdParsed))
+            {
+                return userIdParsed;
+            }
+            else
+            {
+                throw new Exception("Cant be Parsed");
+            }
         }
 
         private RefreshToken GenerateRefreshToken()
@@ -127,7 +147,7 @@ namespace NotebookProgram.WebApi.Controllers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddMinutes(5),
                 signingCredentials: signinCredentials
             );
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
