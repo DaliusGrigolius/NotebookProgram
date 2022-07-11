@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NotebookProgram.Dto\NotebookProgram.Dto.csproj" />
     <ProjectReference Include="..\NotebookProgram.Repository\NotebookProgram.Repository.csproj" />
   </ItemGroup>
 
