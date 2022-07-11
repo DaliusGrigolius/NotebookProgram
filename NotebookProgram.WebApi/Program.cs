@@ -10,9 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-//builder.Services.AddSingleton<IConfiguration>(configuration);
-//builder.Services.AddScoped<IDbConfigurations, DbConfigurations>();
-builder.Services.AddDbContext<NotebookDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("myDb1")));
+builder.Services.AddScoped<IDbConfigurations, DbConfigurations>();
+builder.Services.AddDbContext<NotebookDbContext>();
 builder.Services.AddAuthentication(opt =>
 {
     opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

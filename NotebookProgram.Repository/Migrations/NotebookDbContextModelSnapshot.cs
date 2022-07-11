@@ -34,7 +34,7 @@ namespace NotebookProgram.Repository.Migrations
 
                     b.HasIndex("NotesId");
 
-                    b.ToTable("CategoryNote");
+                    b.ToTable("CategoryNote", (string)null);
                 });
 
             modelBuilder.Entity("NotebookProgram.Repository.Entities.Category", b =>
@@ -52,7 +52,7 @@ namespace NotebookProgram.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("NotebookProgram.Repository.Entities.Image", b =>
@@ -72,7 +72,7 @@ namespace NotebookProgram.Repository.Migrations
 
                     b.HasIndex("NoteId");
 
-                    b.ToTable("Images");
+                    b.ToTable("Images", (string)null);
                 });
 
             modelBuilder.Entity("NotebookProgram.Repository.Entities.Note", b =>
@@ -99,7 +99,7 @@ namespace NotebookProgram.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notes");
+                    b.ToTable("Notes", (string)null);
                 });
 
             modelBuilder.Entity("NotebookProgram.Repository.Entities.RefreshToken", b =>
@@ -125,7 +125,7 @@ namespace NotebookProgram.Repository.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("NotebookProgram.Repository.Entities.User", b =>
@@ -148,7 +148,7 @@ namespace NotebookProgram.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("CategoryNote", b =>
