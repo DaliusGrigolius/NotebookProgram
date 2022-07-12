@@ -15,7 +15,7 @@ namespace NotebookProgram.Repository.Entities
         public byte[] Byte { get; set; }
         [ForeignKey("Note")]
         public Guid NoteId { get; set; }
-        public virtual Note Note { get; set; }
+        public Note Note { get; set; }
 
         public Image(byte[] @byte)
         {

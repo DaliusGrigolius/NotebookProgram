@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NotebookProgram.Dto.Models;
@@ -17,14 +18,13 @@ namespace NotebookProgram.WebApi.Controllers
     {
         private readonly NotebookDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContext;
+        //private readonly IHttpContextAccessor _httpContext;
 
-        public AuthorizationController(IConfiguration configuration, NotebookDbContext context, IHttpContextAccessor httpContext)
+        public AuthorizationController(IConfiguration configuration, NotebookDbContext context /*IHttpContextAccessor httpContext*/)
         {
             _configuration = configuration;
             _context = context;
-            _httpContext = httpContext;
-            //CheckIfUsersTokensAreValid();
+            //_httpContext = httpContext;
         }
 
         [HttpPost("register")]
@@ -72,26 +72,29 @@ namespace NotebookProgram.WebApi.Controllers
             return Ok(new { Token = token });
         }
 
-        //private IActionResult CheckIfUsersTokensAreValid()
-        //{
-        //    string? userId = _httpContext.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //    if (userId == null)
-        //    {
-        //        return BadRequest("Error: user not found");
-        //    }
+        [HttpPost("refresh-tokens"), Authorize]
+        public IActionResult RefreshTokens()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
 
-        //    //return RedirectPermanent("~/AuthorizationController/login");
-        //    //return RedirectToAction(actionName: "login");
+            var user = _context?.Users?
+                .Include(i => i.RefreshTokens)
+                .FirstOrDefault(i => i.RefreshTokens
+                    .Any(i => i.Token == refreshToken));
 
-        //    if (Guid.TryParse(userId, out Guid userIdParsed))
-        //    {
-        //        return Ok(userIdParsed);
-        //    }
-        //    else
-        //    {
-        //        return BadRequest("Error: something went wrong.");
-        //    }
-        //}
+            if (user != null)
+            {
+                string token = CreateToken(user);
+                var newRefreshToken = GenerateRefreshToken();
+                SetRefreshTokenToCookies(newRefreshToken, user);
+
+                return Ok(new { Token = token });
+            }
+            else
+            {
+                return BadRequest("Error: something went wrong.");
+            }
+        }
 
         private bool NameIsTaken(string username)
         {

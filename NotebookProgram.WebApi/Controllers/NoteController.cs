@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace NotebookProgram.WebApi.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class NoteController : ControllerBase
     {

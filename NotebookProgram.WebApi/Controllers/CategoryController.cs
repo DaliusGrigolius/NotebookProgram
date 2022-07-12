@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using NotebookProgram.Business.Interfaces;
 
 namespace NotebookProgram.WebApi.Controllers
 {
@@ -10,36 +9,29 @@ namespace NotebookProgram.WebApi.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        // GET: api/<CategoryController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly ICategoryService _service;
+
+        public CategoryController(ICategoryService service)
         {
-            return new string[] { "value1", "value2" };
+            _service = service;
         }
 
-        // GET api/<CategoryController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpPost("Add new category")]
+        public IActionResult AddNewCategory(string categoryName)
         {
-            return "value";
+            return Ok(_service.AddCategory(categoryName));
         }
 
-        // POST api/<CategoryController>
-        [HttpPost]
-        public void Post([FromForm] string value)
+        [HttpPut("Edit category name")]
+        public IActionResult EditCategoryName(Guid id, string newCategoryName)
         {
+            return Ok(_service.EditCategory(id, newCategoryName));
         }
 
-        // PUT api/<CategoryController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpDelete("Remove category")]
+        public IActionResult DeleteCategory(Guid id)
         {
-        }
-
-        // DELETE api/<CategoryController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return Ok(_service.RemoveCategory(id));
         }
     }
 }
