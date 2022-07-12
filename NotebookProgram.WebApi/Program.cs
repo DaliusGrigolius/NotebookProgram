@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IDbConfigurations, DbConfigurations>();
 builder.Services.AddDbContext<NotebookDbContext>();
 builder.Services.AddAuthentication(opt =>
@@ -74,13 +75,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseRouting();//---------
+//app.UseRouting();//---------
 app.UseAuthentication();//--------
 app.UseAuthorization();
-//app.MapControllers();
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});//---------
+app.MapControllers();
+//app.UseEndpoints(endpoints =>
+//{
+//    endpoints.MapControllers();
+//});//---------
 app.Run();
-public partial class Program { }//----------
+//public partial class Program { }//----------

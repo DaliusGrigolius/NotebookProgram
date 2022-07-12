@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using NotebookProgram.Repository.DbConfigs;
 using NotebookProgram.Repository.Entities;
 
