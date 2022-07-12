@@ -9,7 +9,7 @@ namespace NotebookProgram.Repository.Entities
         [Required]
         public string Name { get; set; }
         [Required]
-        public bool IsPublic { get; set; }
+        public bool IsPublic { get; set; } = false;
         public List<Note> Notes { get; set; }
 
         public Category(string name, bool isPublic = false)

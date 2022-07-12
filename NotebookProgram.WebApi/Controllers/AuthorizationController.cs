@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NotebookProgram.Dto.Models;
@@ -25,96 +24,78 @@ namespace NotebookProgram.WebApi.Controllers
             _configuration = configuration;
             _context = context;
             _httpContext = httpContext;
+            //CheckIfUsersTokensAreValid();
         }
 
         [HttpPost("register")]
-        public IActionResult Register(UserRegisterDto request)
+        public async Task<IActionResult> Register(UserRegisterDto request)
         {
             if (NameIsTaken(request.Username))
             {
-                return BadRequest("Name is taken. Choose another one.");
+                return BadRequest("Error: user already exists.");
             }
 
-            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-            var user = new User(request.Username, passwordHash, passwordSalt);
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            CreatePasswordHash(request.Password, 
+                out byte[] passwordHash, 
+                out byte[] passwordSalt);
 
-            return Ok("Success: registration completed.");
+            var newUser = new User(request.Username, passwordHash, passwordSalt);
+
+            _context?.Users?.Add(newUser);
+            await _context.SaveChangesAsync();
+
+            return Ok("Success: user succesfully created.");
         }
 
-        [HttpPost, Route("login")]
+        [HttpPost("login")]
         public IActionResult Login(UserLoginDto request)
         {
             if (!NameIsTaken(request.Username))
             {
-                return BadRequest("Wrong username or/and password");
+                return BadRequest("Error: wrong username or/and password");
             }
 
-            var user = _context.Users
+            var user = _context?.Users?
                 .Include(i => i.RefreshTokens)
                 .FirstOrDefault(u => u.Username == request.Username);
 
             if (!PasswordHashIsVerified(request.Password, user.PasswordHash, user.PasswordSalt))
             {
-                return BadRequest("Wrong username or/and password");
+                return BadRequest("Error: wrong username or/and password");
             }
 
             string token = CreateToken(user);
 
             var refreshToken = GenerateRefreshToken();
-            SetRefreshToken(refreshToken, user);
+            SetRefreshTokenToCookies(refreshToken, user);
 
             return Ok(new { Token = token });
         }
 
-        public Guid GetCurrentUserId()
-        {
-            string userId = _httpContext.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            if (userId == null)
-            {
-                throw new Exception("User not found");
-            }
+        //private IActionResult CheckIfUsersTokensAreValid()
+        //{
+        //    string? userId = _httpContext.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    if (userId == null)
+        //    {
+        //        return BadRequest("Error: user not found");
+        //    }
 
-            if (Guid.TryParse(userId, out Guid userIdParsed))
-            {
-                return userIdParsed;
-            }
-            else
-            {
-                throw new Exception("Cant be Parsed");
-            }
-        }
+        //    //return RedirectPermanent("~/AuthorizationController/login");
+        //    //return RedirectToAction(actionName: "login");
 
-        private RefreshToken GenerateRefreshToken()
-        {
-            var refreshToken = new RefreshToken
-            {
-                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-                Created = DateTime.UtcNow,
-                Expires = DateTime.UtcNow.AddDays(7),
-            };
-
-            return refreshToken;
-        }
-
-        private void SetRefreshToken(RefreshToken newRefreshToken, User user)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = newRefreshToken.Expires
-            };
-            Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
-
-            user.RefreshTokens.Add(newRefreshToken);
-            _context.RefreshTokens.Add(newRefreshToken);
-            _context.SaveChanges();
-        }
+        //    if (Guid.TryParse(userId, out Guid userIdParsed))
+        //    {
+        //        return Ok(userIdParsed);
+        //    }
+        //    else
+        //    {
+        //        return BadRequest("Error: something went wrong.");
+        //    }
+        //}
 
         private bool NameIsTaken(string username)
         {
-            return _context.Users.Where(u => u.Username == username).ToList().Count > 0;
+            return _context.Users.Any(u => u.Username == username);
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
@@ -137,6 +118,8 @@ namespace NotebookProgram.WebApi.Controllers
 
         private string CreateToken(User user)
         {
+            var accessTokenExpiryDate = DateTime.UtcNow.AddMinutes(1);
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
@@ -149,12 +132,56 @@ namespace NotebookProgram.WebApi.Controllers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: accessTokenExpiryDate,
                 signingCredentials: signinCredentials
             );
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
+            SetAccessTokenToCookies(tokenString, accessTokenExpiryDate);
+
             return tokenString;
+        }
+
+        private void SetAccessTokenToCookies(string token, DateTime accessTokenExpiryDate)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = accessTokenExpiryDate,
+            };
+
+            Response.Cookies.Append("accessToken", token, cookieOptions);
+        }
+
+        private RefreshToken GenerateRefreshToken()
+        {
+            var refreshToken = new RefreshToken
+            {
+                Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+                Created = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddMinutes(2),
+            };
+
+            return refreshToken;
+        }
+
+        private void SetRefreshTokenToCookies(RefreshToken newRefreshToken, User user)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = newRefreshToken.Expires,
+            };
+
+            Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
+            AddRefreshTokenToDatabase(newRefreshToken, user);
+        }
+
+        private void AddRefreshTokenToDatabase(RefreshToken newRefreshToken, User user)
+        {
+            user.RefreshTokens.Add(newRefreshToken);
+            _context?.RefreshTokens?.Add(newRefreshToken);
+            _context?.SaveChanges();
         }
     }
 }
