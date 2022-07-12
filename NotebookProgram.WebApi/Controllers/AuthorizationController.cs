@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using NotebookProgram.Dto;
+using NotebookProgram.Dto.Models;
 using NotebookProgram.Repository.DbContexts;
 using NotebookProgram.Repository.Entities;
 using System.IdentityModel.Tokens.Jwt;
@@ -28,7 +28,7 @@ namespace NotebookProgram.WebApi.Controllers
         }
 
         [HttpPost("register")]
-        public IActionResult Register(UserDto request)
+        public IActionResult Register(UserRegisterDto request)
         {
             if (NameIsTaken(request.Username))
             {
@@ -44,7 +44,7 @@ namespace NotebookProgram.WebApi.Controllers
         }
 
         [HttpPost, Route("login")]
-        public IActionResult Login(UserDto request)
+        public IActionResult Login(UserLoginDto request)
         {
             if (!NameIsTaken(request.Username))
             {

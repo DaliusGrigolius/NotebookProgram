@@ -26,6 +26,7 @@ namespace NotebookProgram.Repository.Entities
             PasswordHash = passwordHash;
             PasswordSalt = passwordSalt;
             Notes = new List<Note>();
+            RefreshTokens = new List<RefreshToken>();
         }
     }
 }
