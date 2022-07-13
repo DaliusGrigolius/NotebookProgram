@@ -1,5 +1,4 @@
-﻿using NotebookProgram.Repository.DbContexts;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace NotebookProgram.Repository.Entities
 {

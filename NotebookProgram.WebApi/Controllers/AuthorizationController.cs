@@ -12,19 +12,17 @@ using System.Text;
 
 namespace NotebookProgram.WebApi.Controllers
 {
-    [Route("api/authorization")]
+    [Route("authorization")]
     [ApiController]
     public class AuthorizationController : Controller
     {
         private readonly NotebookDbContext _context;
         private readonly IConfiguration _configuration;
-        //private readonly IHttpContextAccessor _httpContext;
 
-        public AuthorizationController(IConfiguration configuration, NotebookDbContext context /*IHttpContextAccessor httpContext*/)
+        public AuthorizationController(IConfiguration configuration, NotebookDbContext context)
         {
             _configuration = configuration;
             _context = context;
-            //_httpContext = httpContext;
         }
 
         [HttpPost("register")]
