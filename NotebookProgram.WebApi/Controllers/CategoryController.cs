@@ -5,7 +5,7 @@ using NotebookProgram.Business.Interfaces;
 namespace NotebookProgram.WebApi.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -17,21 +17,39 @@ namespace NotebookProgram.WebApi.Controllers
         }
 
         [HttpPost("Add new category")]
-        public IActionResult AddNewCategory(string categoryName)
+        public async Task<IActionResult> AddNewCategory(string categoryName)
         {
-            return Ok(_service.AddCategory(categoryName));
+            string result = "";
+            await Task.Run(() =>
+            {
+                result = _service.AddCategory(categoryName);
+            });
+
+            return Ok(result);
         }
 
         [HttpPut("Edit category name")]
-        public IActionResult EditCategoryName(Guid id, string newCategoryName)
+        public async Task<IActionResult> EditCategoryName(Guid id, string newCategoryName)
         {
-            return Ok(_service.EditCategory(id, newCategoryName));
+            string result = "";
+            await Task.Run(() =>
+            {
+                result = _service.EditCategory(id, newCategoryName);
+            });
+
+            return Ok(result);
         }
 
         [HttpDelete("Remove category")]
-        public IActionResult DeleteCategory(Guid id)
+        public async Task<IActionResult> DeleteCategory(Guid id)
         {
-            return Ok(_service.RemoveCategory(id));
+            string result = "";
+            await Task.Run(() =>
+            {
+                result = _service.RemoveCategory(id);
+            });
+
+            return Ok(result);
         }
     }
 }

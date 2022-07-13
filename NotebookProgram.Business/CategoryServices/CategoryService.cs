@@ -15,8 +15,8 @@ namespace NotebookProgram.Business.CategoryServices
 
         public string AddCategory(string categoryName)
         {
-            _context.Categories.Add(new Category(categoryName));
-            _context.SaveChanges();
+            _context?.Categories?.Add(new Category(categoryName));
+            _context?.SaveChanges();
             return "Success: new category added.";
         }
 
