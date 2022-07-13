@@ -119,7 +119,7 @@ namespace NotebookProgram.WebApi.Controllers
 
         private string CreateToken(User user)
         {
-            var accessTokenExpiryDate = DateTime.UtcNow.AddMinutes(1);
+            var accessTokenExpiryDate = DateTime.UtcNow.AddMinutes(30);
 
             var claims = new List<Claim>
             {
@@ -160,7 +160,7 @@ namespace NotebookProgram.WebApi.Controllers
             {
                 Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
                 Created = DateTime.UtcNow,
-                Expires = DateTime.UtcNow.AddMinutes(2),
+                Expires = DateTime.UtcNow.AddHours(1),
             };
 
             return refreshToken;
