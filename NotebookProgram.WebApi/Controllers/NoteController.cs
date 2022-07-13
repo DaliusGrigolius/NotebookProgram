@@ -4,8 +4,6 @@ using NotebookProgram.Business.Interfaces;
 using NotebookProgram.Dto.Models;
 using NotebookProgram.Repository.Entities;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace NotebookProgram.WebApi.Controllers
 {
     [Authorize]
@@ -33,8 +31,9 @@ namespace NotebookProgram.WebApi.Controllers
         }
 
         [HttpGet("Show all notes")]
-        public async Task<IActionResult> ShowNotes(string noteTitle)
+        public async Task<IActionResult> ShowNotes()
         {
+            List<NoteDto> noteDtoList;
             var notes = new List<Note>();
 
             await Task.Run(() =>
@@ -47,14 +46,15 @@ namespace NotebookProgram.WebApi.Controllers
                 return BadRequest("Notes not found");
             }
 
-            TransferDataToNoteDto(notes, out List<NoteDto> noteDtoList);
+            TransferDataToNoteDto(notes, out noteDtoList);
 
-            return Ok(notes);
+            return Ok(noteDtoList);
         }
 
         [HttpGet("Find notes by title")]
         public async Task<IActionResult> FilterNotesByTitle(string noteTitle)
         {
+            List<NoteDto> noteDtoList;
             var filteredNotes = new List<Note>();
 
             await Task.Run(() =>
@@ -67,7 +67,7 @@ namespace NotebookProgram.WebApi.Controllers
                 return BadRequest("Notes not found");
             }
 
-            TransferDataToNoteDto(filteredNotes, out List<NoteDto> noteDtoList);
+            TransferDataToNoteDto(filteredNotes, out noteDtoList);
 
             return Ok(noteDtoList);
         }
@@ -148,33 +148,27 @@ namespace NotebookProgram.WebApi.Controllers
             for (int i = 0; i < filteredNotes.Count; i++)
             {
                 noteDtoList.Add(new NoteDto(filteredNotes[i].Id, filteredNotes[i].Title, filteredNotes[i].Content, filteredNotes[i].UserId));
-            }
 
-            for (int i = 0; i < filteredNotes.Count; i++)
-            {
-                for (int j = 0; j < noteDtoList.Count; j++)
+                if (filteredNotes[i].Categories.Count != 0)
                 {
-                    if (filteredNotes[i].Categories.Count != 0)
+                    for (int j = 0; j < filteredNotes[i].Categories.Count; j++)
                     {
-                        noteDtoList[j].Categories.Add(new CategoryDto
+                        noteDtoList[i].Categories.Add(new CategoryDto
                         {
-                            Id = filteredNotes[i].Categories[i].Id,
-                            Name = filteredNotes[i].Categories[i].Name
+                            Id = filteredNotes[i].Categories[j].Id,
+                            Name = filteredNotes[i].Categories[j].Name
                         });
                     }
                 }
-            }
 
-            for (int i = 0; i < filteredNotes.Count; i++)
-            {
-                for (int j = 0; j < noteDtoList.Count; j++)
+                if (filteredNotes[i].Images.Count != 0)
                 {
-                    if (filteredNotes[i].Images.Count != 0)
+                    for (int j = 0; j < filteredNotes[i].Images.Count; j++)
                     {
                         noteDtoList[j].Images.Add(new ImageDto
                         {
-                            Id = filteredNotes[i].Images[i].Id,
-                            Byte = filteredNotes[i].Images[i].Byte
+                            Id = filteredNotes[i].Images[j].Id,
+                            Byte = filteredNotes[i].Images[j].Byte
                         });
                     }
                 }
