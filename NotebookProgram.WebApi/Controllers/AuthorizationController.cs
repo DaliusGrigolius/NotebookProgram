@@ -138,20 +138,7 @@ namespace NotebookProgram.WebApi.Controllers
             );
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
-            SetAccessTokenToCookies(tokenString, accessTokenExpiryDate);
-
             return tokenString;
-        }
-
-        private void SetAccessTokenToCookies(string token, DateTime accessTokenExpiryDate)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = accessTokenExpiryDate,
-            };
-
-            Response.Cookies.Append("accessToken", token, cookieOptions);
         }
 
         private RefreshToken GenerateRefreshToken()
