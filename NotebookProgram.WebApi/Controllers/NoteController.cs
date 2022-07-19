@@ -18,7 +18,7 @@ namespace NotebookProgram.WebApi.Controllers
             _service = service;
         }
 
-        [HttpPost("Create a note")]
+        [HttpPost("Create-a-note")]
         public async Task<IActionResult> CreateNote(string title, string content)
         {
             string result = "";
@@ -30,10 +30,9 @@ namespace NotebookProgram.WebApi.Controllers
             return Ok(result);
         }
 
-        [HttpGet("Show all notes")]
+        [HttpGet("Show-all-notes")]
         public async Task<IActionResult> ShowNotes()
         {
-            List<NoteDto> noteDtoList;
             var notes = new List<Note>();
 
             await Task.Run(() =>
@@ -43,18 +42,17 @@ namespace NotebookProgram.WebApi.Controllers
 
             if (notes.Count == 0)
             {
-                return BadRequest("Notes not found");
+                return NotFound("Notes not found");
             }
 
-            TransferDataToNoteDto(notes, out noteDtoList);
+            TransferDataToNoteDto(notes, out List<NoteDto> noteDtoList);
 
             return Ok(noteDtoList);
         }
 
-        [HttpGet("Find notes by title")]
+        [HttpGet("Find-notes-by-title")]
         public async Task<IActionResult> FilterNotesByTitle(string noteTitle)
         {
-            List<NoteDto> noteDtoList;
             var filteredNotes = new List<Note>();
 
             await Task.Run(() =>
@@ -64,18 +62,17 @@ namespace NotebookProgram.WebApi.Controllers
 
             if (filteredNotes.Count == 0)
             {
-                return BadRequest("Notes not found");
+                return NotFound("Notes not found");
             }
 
-            TransferDataToNoteDto(filteredNotes, out noteDtoList);
+            TransferDataToNoteDto(filteredNotes, out List<NoteDto> noteDtoList);
 
             return Ok(noteDtoList);
         }
 
-        [HttpGet("Find notes by category name")]
+        [HttpGet("Find-notes-by-category-name")]
         public async Task<IActionResult> FilterNotesByCategoryName(string categoryName)
         {
-            List<NoteDto> noteDtoList;
             var filteredNotes = new List<Note>();
 
             await Task.Run(() =>
@@ -85,15 +82,15 @@ namespace NotebookProgram.WebApi.Controllers
 
             if (filteredNotes.Count == 0)
             {
-                return BadRequest("Notes not found");
+                return NotFound("Notes not found");
             }
 
-            TransferDataToNoteDto(filteredNotes, out noteDtoList);
+            TransferDataToNoteDto(filteredNotes, out List<NoteDto> noteDtoList);
 
             return Ok(noteDtoList);
         }
 
-        [HttpPut("Edit the note")]
+        [HttpPut("Edit-the-note")]
         public async Task<IActionResult> EditNote(Guid noteId, string newTitle, string newContent)
         {
             string result = "";
@@ -105,7 +102,7 @@ namespace NotebookProgram.WebApi.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Assign category to the note")]
+        [HttpPut("Assign-category-to-the-note")]
         public async Task<IActionResult> AssignCategory(Guid noteId, Guid categoryId)
         {
             string result = "";
@@ -117,19 +114,19 @@ namespace NotebookProgram.WebApi.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Add image to the note")]
-        public async Task<IActionResult> AddImage(Guid noteId, string filePath)
+        [HttpPost("Add-image-to-the-note")]
+        public async Task<IActionResult> AddImage(Guid noteId, IFormFile file)
         {
             string result = "";
             await Task.Run(() =>
             {
-                result = _service.AddImageToTheNote(noteId, filePath);
+                result = _service.AddImageToTheNote(noteId, file); // ON DUTY
             });
 
             return Ok(result);
         }
 
-        [HttpDelete("Remove the note")]
+        [HttpDelete("Remove-the-note")]
         public async Task<IActionResult> DeleteNote(Guid noteId)
         {
             string result = "";
@@ -165,10 +162,12 @@ namespace NotebookProgram.WebApi.Controllers
                 {
                     for (int j = 0; j < filteredNotes[i].Images.Count; j++)
                     {
-                        noteDtoList[j].Images.Add(new ImageDto
+                        //string result = System.Text.Encoding.UTF8.GetString(filteredNotes[i].Images[j].Byte);
+                        
+                        noteDtoList[i].Images.Add(new ImageDto
                         {
                             Id = filteredNotes[i].Images[j].Id,
-                            Byte = filteredNotes[i].Images[j].Byte
+                            Byte = filteredNotes[i].Images[j].Byte,
                         });
                     }
                 }

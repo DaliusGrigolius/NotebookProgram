@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotebookProgram.Dto", "Note
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotebookProgram.Business", "NotebookProgram.Business\NotebookProgram.Business.csproj", "{313EA1D3-EA12-4810-9F15-6EAEFC677A98}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotebookProgram.FrontEnd", "NotebookProgram.FrontEnd\NotebookProgram.FrontEnd.csproj", "{A56FBD32-C937-4F4F-8887-2632CF8A3497}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{313EA1D3-EA12-4810-9F15-6EAEFC677A98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{313EA1D3-EA12-4810-9F15-6EAEFC677A98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{313EA1D3-EA12-4810-9F15-6EAEFC677A98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A56FBD32-C937-4F4F-8887-2632CF8A3497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A56FBD32-C937-4F4F-8887-2632CF8A3497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A56FBD32-C937-4F4F-8887-2632CF8A3497}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A56FBD32-C937-4F4F-8887-2632CF8A3497}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

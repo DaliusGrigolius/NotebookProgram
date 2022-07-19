@@ -30,6 +30,11 @@ namespace NotebookProgram.Business.CategoryServices
             return "Success: category updated.";
         }
 
+        public List<Category> GetallCategories()
+        {
+            return _context.Categories.ToList();
+        }
+
         public string RemoveCategory(Guid categoryId)
         {
             var category = _context.Categories.Find(categoryId);

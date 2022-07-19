@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NotebookProgram.Business.Interfaces;
 using NotebookProgram.Dto.Models;
 using NotebookProgram.Repository.DbContexts;
 using NotebookProgram.Repository.Entities;
@@ -65,33 +66,50 @@ namespace NotebookProgram.WebApi.Controllers
             string token = CreateToken(user);
 
             var refreshToken = GenerateRefreshToken();
-            SetRefreshTokenToCookies(refreshToken, user);
+            AddRefreshTokenToDatabase(refreshToken, user);
 
-            return Ok(new { Token = token });
+            return Ok(new
+            {
+                Token = token,
+                RefreshToken = new
+                {
+                    Token = refreshToken.Token,
+                    Expires = refreshToken.Expires
+                }
+            });
         }
 
-        [HttpPost("refresh-tokens"), Authorize]
-        public IActionResult RefreshTokens()
+        [HttpPost("refresh-tokens")]
+        public IActionResult RefreshTokens(string refreshToken)
         {
-            var refreshToken = Request.Cookies["refreshToken"];
-
             var user = _context?.Users?
                 .Include(i => i.RefreshTokens)
                 .FirstOrDefault(i => i.RefreshTokens
+                    //.OrderBy(i => i.Created)
                     .Any(i => i.Token == refreshToken));
 
-            if (user != null)
+            if (user == null)
             {
-                string token = CreateToken(user);
-                var newRefreshToken = GenerateRefreshToken();
-                SetRefreshTokenToCookies(newRefreshToken, user);
+                return Unauthorized("Invalid Refresh Token.");
+            }
+            else if (user.RefreshTokens.Last().Expires < DateTime.UtcNow)
+            {
+                return Unauthorized("Token expired.");
+            }
 
-                return Ok(new { Token = token });
-            }
-            else
+            string token = CreateToken(user);
+            var newRefreshToken = GenerateRefreshToken();
+            AddRefreshTokenToDatabase(newRefreshToken, user);
+
+            return Ok(new
             {
-                return BadRequest("Error: something went wrong.");
-            }
+                Token = token,
+                RefreshToken = new
+                {
+                    Token = newRefreshToken.Token,
+                    Expires = newRefreshToken.Expires
+                }
+            });
         }
 
         private bool NameIsTaken(string username)
@@ -119,7 +137,7 @@ namespace NotebookProgram.WebApi.Controllers
 
         private string CreateToken(User user)
         {
-            var accessTokenExpiryDate = DateTime.UtcNow.AddMinutes(30);
+            var accessTokenExpiryDate = DateTime.UtcNow.AddDays(1);
 
             var claims = new List<Claim>
             {
@@ -147,23 +165,23 @@ namespace NotebookProgram.WebApi.Controllers
             {
                 Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
                 Created = DateTime.UtcNow,
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.AddDays(7),
             };
 
             return refreshToken;
         }
 
-        private void SetRefreshTokenToCookies(RefreshToken newRefreshToken, User user)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = newRefreshToken.Expires,
-            };
+        //private void SetRefreshTokenToCookies(RefreshToken newRefreshToken, User user)
+        //{
+        //    var cookieOptions = new CookieOptions
+        //    {
+        //        HttpOnly = true,
+        //        Expires = newRefreshToken.Expires,
+        //    };
 
-            Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
-            AddRefreshTokenToDatabase(newRefreshToken, user);
-        }
+        //    Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
+        //    AddRefreshTokenToDatabase(newRefreshToken, user);
+        //}
 
         private void AddRefreshTokenToDatabase(RefreshToken newRefreshToken, User user)
         {

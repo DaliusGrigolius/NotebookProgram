@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NotebookProgram.Business.Interfaces;
+using NotebookProgram.Dto.Models;
+using NotebookProgram.Repository.Entities;
 
 namespace NotebookProgram.WebApi.Controllers
 {
@@ -16,7 +18,7 @@ namespace NotebookProgram.WebApi.Controllers
             _service = service;
         }
 
-        [HttpPost("Add new category")]
+        [HttpPost("Add-new-category")]
         public async Task<IActionResult> AddNewCategory(string categoryName)
         {
             string result = "";
@@ -28,7 +30,27 @@ namespace NotebookProgram.WebApi.Controllers
             return Ok(result);
         }
 
-        [HttpPut("Edit category name")]
+        [HttpGet("Get-all-categories")]
+        public async Task<ActionResult<List<CategoryDto>>> GetAllCategories()
+        {
+            List<Category> categories = null;
+
+            await Task.Run(() =>
+            {
+                categories = _service.GetallCategories();
+            });
+
+            if (categories.Count == 0)
+            {
+                return NotFound("Categories not found");
+            }
+
+            TransferDataToCategoriesDto(categories, out List<CategoryDto> categoriesDtoList);
+
+            return Ok(categoriesDtoList);
+        }
+
+        [HttpPut("Edit-category-name")]
         public async Task<IActionResult> EditCategoryName(Guid id, string newCategoryName)
         {
             string result = "";
@@ -40,7 +62,7 @@ namespace NotebookProgram.WebApi.Controllers
             return Ok(result);
         }
 
-        [HttpDelete("Remove category")]
+        [HttpDelete("Remove-category")]
         public async Task<IActionResult> DeleteCategory(Guid id)
         {
             string result = "";
@@ -50,6 +72,20 @@ namespace NotebookProgram.WebApi.Controllers
             });
 
             return Ok(result);
+        }
+
+        private void TransferDataToCategoriesDto(List<Category> categories, out List<CategoryDto> categoriesDtoList)
+        {
+            categoriesDtoList = new List<CategoryDto>();
+
+            for (int i = 0; i < categories.Count; i++)
+            {
+                categoriesDtoList.Add(new CategoryDto
+                {
+                    Id = categories[i].Id,
+                    Name = categories[i].Name,
+                });
+            }
         }
     }
 }
