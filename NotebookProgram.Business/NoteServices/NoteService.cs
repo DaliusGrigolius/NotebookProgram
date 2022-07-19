@@ -33,7 +33,7 @@ namespace NotebookProgram.Business.NoteServices
             return "Success: note created.";
         }
 
-        public string AddImageToTheNote(Guid noteId, string imagePath)
+        public string AddImageToTheNote(Guid noteId, byte[] arrayBuffer)
         {
             var note = _context?.Notes?.Find(noteId);
             if (note == null)
@@ -41,13 +41,13 @@ namespace NotebookProgram.Business.NoteServices
                 return "Error: note not found.";
             }
 
-            if (!PathIsValid(imagePath))
-            {
-                return "Error: invalid file path.";
-            }
+            //if (!PathIsValid(imagePath))
+            //{
+            //    return "Error: invalid file path.";
+            //}
 
-            var buffer = ConvertImageToBinary(imagePath);
-            var image = new Image(buffer);
+            //var buffer = ConvertImageToBinary(imagePath);
+            var image = new Image(arrayBuffer);
 
             note.Images.Add(image);
             _context?.Images?.Add(image);
@@ -56,11 +56,11 @@ namespace NotebookProgram.Business.NoteServices
             return "Success: image added.";
         }
 
-        private bool PathIsValid(string imagePath)
-        {
-            Regex regex = new Regex(@"^(?:[a-zA-Z]\:|\\\\[\w\.]+\\[\w.$]+)\\(?:[\w]+\\)*\w([\w.])+$");
-            return regex.IsMatch(imagePath);
-        }
+        //private bool PathIsValid(string imagePath)
+        //{
+        //    Regex regex = new Regex(@"^(?:[a-zA-Z]\:|\\\\[\w\.]+\\[\w.$]+)\\(?:[\w]+\\)*\w([\w.])+$");
+        //    return regex.IsMatch(imagePath);
+        //}
 
         private byte[] ConvertImageToBinary(string imagePath)
         {
@@ -74,10 +74,18 @@ namespace NotebookProgram.Business.NoteServices
 
         public string AssignACategoryToTheNote(Guid noteId, Guid categoryId)
         {
-            var note = _context?.Notes?.Find(noteId);
+            var note = _context?.Notes?
+                .Include(i => i.Categories)
+                .FirstOrDefault(i => i.Id == noteId);
+
             if (note == null)
             {
                 return "Error: note doesn't exist.";
+            }
+
+            if (note.Categories.Any(i => i.Id == categoryId))
+            {
+                return "Category already assigned.";
             }
 
             var category = _context?.Categories?.Find(categoryId);
