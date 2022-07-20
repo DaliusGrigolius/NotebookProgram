@@ -8,7 +8,6 @@ using NotebookProgram.Business.NoteServices;
 using NotebookProgram.Business.UserServices;
 using NotebookProgram.Repository.DbConfigs;
 using NotebookProgram.Repository.DbContexts;
-using System.Net;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,12 +34,6 @@ builder.Services.AddCors(opt =>
             .AllowAnyMethod();
     });
 });
-
-//builder.Services.AddHttpsRedirection(options =>
-//{
-//    options.RedirectStatusCode = (int)HttpStatusCode.TemporaryRedirect;
-//    options.HttpsPort = 443;
-//});
 
 builder.Services.AddAuthentication(opt =>
 {
@@ -96,7 +89,6 @@ builder.Services.AddSwaggerGen(opt =>
 var app = builder.Build();
 
 app.UseForwardedHeaders();
-
 app.UseExceptionHandler("/error");
 app.UseHsts();
 app.UseHttpsRedirection();
@@ -110,9 +102,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
-//app.UseRouting();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

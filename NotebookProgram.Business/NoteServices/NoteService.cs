@@ -2,7 +2,6 @@
 using NotebookProgram.Business.Interfaces;
 using NotebookProgram.Repository.DbContexts;
 using NotebookProgram.Repository.Entities;
-using System.Text.RegularExpressions;
 
 namespace NotebookProgram.Business.NoteServices
 {
@@ -23,7 +22,7 @@ namespace NotebookProgram.Business.NoteServices
             var currentUser = _service.GetCurrentUser();
             if(currentUser == null)
             {
-                return "Error: user not found or users data damaged.";
+                return "Error: user not found.";
             }
 
             currentUser.Notes.Add(newNote);
@@ -33,43 +32,22 @@ namespace NotebookProgram.Business.NoteServices
             return "Success: note created.";
         }
 
-        public string AddImageToTheNote(Guid noteId, byte[] arrayBuffer)
+        public string AddImageToTheNote(Guid noteId, byte[] img)
         {
             var note = _context?.Notes?.Find(noteId);
+
             if (note == null)
             {
                 return "Error: note not found.";
             }
 
-            //if (!PathIsValid(imagePath))
-            //{
-            //    return "Error: invalid file path.";
-            //}
-
-            //var buffer = ConvertImageToBinary(imagePath);
-            var image = new Image(arrayBuffer);
+            var image = new Image(img);
 
             note.Images.Add(image);
             _context?.Images?.Add(image);
             _context?.SaveChanges();
 
             return "Success: image added.";
-        }
-
-        //private bool PathIsValid(string imagePath)
-        //{
-        //    Regex regex = new Regex(@"^(?:[a-zA-Z]\:|\\\\[\w\.]+\\[\w.$]+)\\(?:[\w]+\\)*\w([\w.])+$");
-        //    return regex.IsMatch(imagePath);
-        //}
-
-        private byte[] ConvertImageToBinary(string imagePath)
-        {
-            FileStream fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
-            byte[] buffer = new byte[fileStream.Length];
-            fileStream.Read(buffer, 0, (int)fileStream.Length);
-            fileStream.Close();
-
-            return buffer;
         }
 
         public string AssignACategoryToTheNote(Guid noteId, Guid categoryId)
@@ -80,7 +58,7 @@ namespace NotebookProgram.Business.NoteServices
 
             if (note == null)
             {
-                return "Error: note doesn't exist.";
+                return "Error: note not found.";
             }
 
             if (note.Categories.Any(i => i.Id == categoryId))
@@ -91,7 +69,7 @@ namespace NotebookProgram.Business.NoteServices
             var category = _context?.Categories?.Find(categoryId);
             if (category == null)
             {
-                return "Error: category doesn't exist.";
+                return "Error: category not found.";
             }
 
             category?.Notes.Add(note);
@@ -106,7 +84,7 @@ namespace NotebookProgram.Business.NoteServices
             var note = _context?.Notes?.Find(noteId);
             if (note == null)
             {
-                return "Error: note doesn't exist.";
+                return "Error: note not found.";
             }
 
             note.Title = noteCaption;
@@ -123,7 +101,7 @@ namespace NotebookProgram.Business.NoteServices
             var note = _context?.Notes?.Find(noteId);
             if (note == null)
             {
-                return "Error: note doesn't exist.";
+                return "Error: note not found.";
             }
 
             note.Categories.Clear();
