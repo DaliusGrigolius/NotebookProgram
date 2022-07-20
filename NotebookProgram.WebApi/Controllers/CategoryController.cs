@@ -12,10 +12,12 @@ namespace NotebookProgram.WebApi.Controllers
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _service;
+        private readonly IUserService _userService;
 
-        public CategoryController(ICategoryService service)
+        public CategoryController(ICategoryService service, IUserService userService)
         {
             _service = service;
+            _userService = userService;
         }
 
         [HttpPost("Add-new-category")]
@@ -76,6 +78,9 @@ namespace NotebookProgram.WebApi.Controllers
 
         private void TransferDataToCategoriesDto(List<Category> categories, out List<CategoryDto> categoriesDtoList)
         {
+
+            var userId = _userService.GetCurrentUserId();
+
             categoriesDtoList = new List<CategoryDto>();
 
             for (int i = 0; i < categories.Count; i++)
@@ -84,6 +89,7 @@ namespace NotebookProgram.WebApi.Controllers
                 {
                     Id = categories[i].Id,
                     Name = categories[i].Name,
+                    UserId = (Guid)userId,
                 });
             }
         }
