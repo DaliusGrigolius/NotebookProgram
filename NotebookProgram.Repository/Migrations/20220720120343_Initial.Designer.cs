@@ -12,8 +12,8 @@ using NotebookProgram.Repository.DbContexts;
 namespace NotebookProgram.Repository.Migrations
 {
     [DbContext(typeof(NotebookDbContext))]
-    [Migration("20220711082443_AddRefreshTokenModel")]
-    partial class AddRefreshTokenModel
+    [Migration("20220720120343_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -45,12 +45,12 @@ namespace NotebookProgram.Repository.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsPublic")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
@@ -86,9 +86,6 @@ namespace NotebookProgram.Repository.Migrations
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsPublic")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()

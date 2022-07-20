@@ -24,9 +24,8 @@ namespace NotebookProgram.Business.UserServices
             if (userId != null)
             {
                 var user = _context?.Users?
-                .Include(i => i.Notes)
-                .Include(i => i.RefreshTokens)
-                .FirstOrDefault(u => u.Id == userId);
+                    .Include(i => i.Notes)
+                    .FirstOrDefault(u => u.Id == userId);
 
                 return user;
             }

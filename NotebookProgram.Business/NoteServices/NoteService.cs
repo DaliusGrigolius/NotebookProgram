@@ -18,8 +18,8 @@ namespace NotebookProgram.Business.NoteServices
 
         public string CreateANote(string caption, string content)
         {
-            var newNote = new Note(caption, content);
             var currentUser = _service.GetCurrentUser();
+            var newNote = new Note(caption, content);
             if(currentUser == null)
             {
                 return "Error: user not found.";
@@ -114,17 +114,22 @@ namespace NotebookProgram.Business.NoteServices
 
         public List<Note> FindNotesByTitle(string noteTitle)
         {
+            var currentUserId = _service.GetCurrentUserId();
+
             var notes = _context?.Notes?
+                .Where(i => i.UserId == currentUserId && i.Title == noteTitle)
                 .Include(i => i.Images)
-                .Include(i => i.Categories)
-                .Where(note => note.Title == noteTitle).ToList();
+                .Include(i => i.Categories).ToList();
 
             return notes;
         }
 
         public List<Note> FindNotesByCategoryName(string categoryName)
         {
+            var currentUserId = _service.GetCurrentUserId();
+
             var filteredNotes = _context?.Notes?
+                .Where(i => i.UserId == currentUserId)
                 .Include(i => i.Images)
                 .Include(i => i.Categories)
                 .Where(i => i.Categories.Any(i => i.Name == categoryName)).ToList();

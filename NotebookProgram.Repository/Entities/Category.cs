@@ -8,6 +8,8 @@ namespace NotebookProgram.Repository.Entities
         [Required]
         public string Name { get; set; }
         public List<Note> Notes { get; set; }
+        [Required]   
+        public Guid UserId { get; set; }
 
         public Category(string name)
         {

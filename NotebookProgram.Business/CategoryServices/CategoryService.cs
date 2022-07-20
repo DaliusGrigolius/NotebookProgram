@@ -7,29 +7,39 @@ namespace NotebookProgram.Business.CategoryServices
     public class CategoryService : ICategoryService
     {
         private readonly NotebookDbContext _context;
+        private readonly IUserService _service;
 
-        public CategoryService(NotebookDbContext context)
+        public CategoryService(NotebookDbContext context, IUserService service)
         {
             _context = context;
+            _service = service;
         }
 
         public string AddCategory(string categoryName)
         {
-            _context?.Categories?.Add(new Category(categoryName));
+            var userId = _service.GetCurrentUserId();
+            var category = new Category(categoryName);
+            category.UserId = (Guid)userId;
+
+            _context?.Categories?.Add(category);
             _context?.SaveChanges();
+
             return "Success: new category added.";
         }
 
         public string EditCategory(Guid categoryId, string newCategoryName)
         {
-            var category = _context.Categories.Find(categoryId);
-            if (category == null)
+            var userId = _service.GetCurrentUserId();
+            var currentCategory = _context.Categories
+                .Where(c => c.Id == categoryId && c.UserId == userId)
+                .FirstOrDefault();
+
+            if (currentCategory != null)
             {
-                return "Error: category not found.";
+                currentCategory.Name = newCategoryName;
+                _context.SaveChanges();
             }
 
-            category.Name = newCategoryName;
-            _context.Update(category);
             _context.SaveChanges();
 
             return "Success: category updated.";
@@ -37,7 +47,10 @@ namespace NotebookProgram.Business.CategoryServices
 
         public List<Category> GetallCategories()
         {
-            return _context.Categories.ToList();
+            var userId = _service.GetCurrentUserId();
+            var getAllCategories = _context?.Categories?.Where(i => i.UserId == userId).ToList();
+
+            return getAllCategories;
         }
 
         public string RemoveCategory(Guid categoryId)
