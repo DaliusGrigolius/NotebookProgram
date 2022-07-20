@@ -23,6 +23,11 @@ namespace NotebookProgram.Business.CategoryServices
         public string EditCategory(Guid categoryId, string newCategoryName)
         {
             var category = _context.Categories.Find(categoryId);
+            if (category == null)
+            {
+                return "Error: category not found.";
+            }
+
             category.Name = newCategoryName;
             _context.Update(category);
             _context.SaveChanges();

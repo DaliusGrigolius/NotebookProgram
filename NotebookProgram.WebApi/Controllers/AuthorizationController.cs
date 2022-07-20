@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using NotebookProgram.Business.Interfaces;
 using NotebookProgram.Dto.Models;
 using NotebookProgram.Repository.DbContexts;
 using NotebookProgram.Repository.Entities;
@@ -85,7 +83,6 @@ namespace NotebookProgram.WebApi.Controllers
             var user = _context?.Users?
                 .Include(i => i.RefreshTokens)
                 .FirstOrDefault(i => i.RefreshTokens
-                    //.OrderBy(i => i.Created)
                     .Any(i => i.Token == refreshToken));
 
             if (user == null)
@@ -170,18 +167,6 @@ namespace NotebookProgram.WebApi.Controllers
 
             return refreshToken;
         }
-
-        //private void SetRefreshTokenToCookies(RefreshToken newRefreshToken, User user)
-        //{
-        //    var cookieOptions = new CookieOptions
-        //    {
-        //        HttpOnly = true,
-        //        Expires = newRefreshToken.Expires,
-        //    };
-
-        //    Response.Cookies.Append("refreshToken", newRefreshToken.Token, cookieOptions);
-        //    AddRefreshTokenToDatabase(newRefreshToken, user);
-        //}
 
         private void AddRefreshTokenToDatabase(RefreshToken newRefreshToken, User user)
         {

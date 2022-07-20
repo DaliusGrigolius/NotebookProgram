@@ -118,10 +118,23 @@ namespace NotebookProgram.WebApi.Controllers
         public async Task<IActionResult> AddImage(Guid noteId, IFormFile file)
         {
             string result = "";
-            await Task.Run(() =>
+  
+            if (file.Length > 0)
             {
-                result = _service.AddImageToTheNote(noteId, file); // ON DUTY
-            });
+                using (var ms = new MemoryStream())
+                {
+                    file.CopyTo(ms);
+                    byte[] data = ms.ToArray();
+                    await Task.Run(() =>
+                    {
+                        result =  _service.AddImageToTheNote(noteId, data);
+                    });
+                }
+            }
+            else
+            {
+                result = "Error: something went wrong with file saving.";
+            }
 
             return Ok(result);
         }
@@ -162,8 +175,6 @@ namespace NotebookProgram.WebApi.Controllers
                 {
                     for (int j = 0; j < filteredNotes[i].Images.Count; j++)
                     {
-                        //string result = System.Text.Encoding.UTF8.GetString(filteredNotes[i].Images[j].Byte);
-                        
                         noteDtoList[i].Images.Add(new ImageDto
                         {
                             Id = filteredNotes[i].Images[j].Id,
